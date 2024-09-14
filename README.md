@@ -39,7 +39,7 @@ API_KEY_VALUE="0845f0b322938a32731e842aa0aac735"
 CACHE_TIME="5 minutes"  # Caching time for the weather data
 RATELIMIT_TIME=5        # Rate limiting time in minutes for request limit per user
 SECRET_API_KEY="souravisawesome" # Custom secret API key for securing proxy requests
-PORT=4444              # Port on which the Express server runs
+           
 
 ```
 
