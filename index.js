@@ -35,6 +35,7 @@ app.use(limit);
 const API_BASE_KEY = process.env.API_BASE_KEY;
 const API_KEY_VALUE = process.env.API_KEY_VALUE;
 const API_BASE_URL = process.env.API_BASE_URL;
+const SECRET_API_KEY = process.env.SECRET_API_KEY;
 
 app.use((req, res, next) => {
   console.log({
@@ -62,7 +63,17 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/getWeather", cache(cacheTime), async (req, res) => {
+
+const authenticate = (req, res, next) => {
+  const clientApiKey = req.headers['x-api-key'];
+  if (clientApiKey && clientApiKey === SECRET_API_KEY) {
+    next();
+  } else {
+    res.status(401).json({ error: "Unauthorized: Invalid API key" });
+  }
+};
+
+app.get("/getWeather", authenticate, cache(cacheTime), async (req, res) => {
   try {
     const city = req.query.q;
 
