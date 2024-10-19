@@ -24,7 +24,6 @@ To clone this project to your local machine, run the following command:
 
 ```bash
 git clone https://github.com/Skumar1690/-API-Proxy-Server.git
-cd -API-Proxy-Server
 ```
 
 ## Environment Variables
