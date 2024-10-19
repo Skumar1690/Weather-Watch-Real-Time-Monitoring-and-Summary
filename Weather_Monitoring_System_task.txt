@@ -1,0 +1,127 @@
+Project: Real-Time Weather Monitoring System
+
+Objective:
+The goal of this project is to create a weather monitoring system that retrieves live weather data 
+for Indian cities using the OpenWeatherMap API. The system will collect, summarize, and notify users 
+when weather conditions exceed certain thresholds. The focus will be on tracking temperature, 
+weather conditions (Rain, Clear, etc.), and more.
+
+Step-by-Step Plan:
+
+Step 1: Project Setup
+1. Clone the Project
+   - Open the terminal and run these commands:
+     git clone https://github.com/Skumar1690/Weather-Watch-Real-Time-Monitoring-and-Summary
+     cd Weather-Watch-Real-Time-Monitoring-and-Summary
+
+2. Set up Environment Variables
+   - Create a `.env` file in the root folder and add the following:
+     API_BASE_URL="http://api.openweathermap.org/data/2.5/weather"
+     API_BASE_KEY="appid"
+     API_KEY_VALUE="<your_openweathermap_api_key>"
+     CACHE_TIME="5 minutes"
+     RATELIMIT_TIME=5
+     SECRET_API_KEY="<your_custom_secret_key>"
+
+3. Install Required Packages
+   - Run the command to install the required libraries:
+     npm install
+
+Step 2: Retrieve Weather Data from the OpenWeatherMap API
+1. Write a Function to Get Weather Data
+   - The system should call the OpenWeatherMap API to get weather details like temperature 
+     and main conditions for cities such as Delhi, Mumbai, Chennai, etc.
+   
+   Example Function:
+   const axios = require('axios');
+   async function getWeather(city) {
+       const url = \`\${process.env.API_BASE_URL}?q=\${city}&appid=\${process.env.API_KEY_VALUE}\`;
+       const response = await axios.get(url);
+       return response.data;
+   }
+
+2. Convert Temperature to Celsius
+   - The weather data from the API is in Kelvin. You need to convert it to Celsius using this formula:
+     Celsius = Kelvin - 273.15
+
+   Example Function:
+   function kelvinToCelsius(kelvin) {
+       return kelvin - 273.15;
+   }
+
+Step 3: Processing and Summarizing Data
+1. Create Daily Weather Summaries
+   - Collect weather data every 5 minutes and store it. 
+   - At the end of the day, calculate:
+     a) Average temperature
+     b) Maximum temperature
+     c) Minimum temperature
+     d) Dominant weather condition (the one that appears the most)
+
+   Example:
+   const dailyWeatherSummary = {
+       city: "Delhi",
+       averageTemp: 30.5,
+       maxTemp: 35.2,
+       minTemp: 25.8,
+       dominantCondition: "Clear",
+       date: "YYYY-MM-DD"
+   };
+
+2. Store Data
+   - Save daily summaries in a database like MongoDB for later analysis.
+
+Step 4: Setting Alerts for Weather Conditions
+1. Define Thresholds for Alerts
+   - Users can set limits to trigger alerts if the temperature exceeds 35°C or if it starts raining.
+
+   Example:
+   const userThreshold = {
+       temperature: 35, // in Celsius
+       condition: "Rain",
+   };
+
+2. Check and Trigger Alerts
+   - The system will compare the latest weather data with the thresholds. If the limit is exceeded, it triggers an alert.
+
+   Example Function:
+   function checkThresholds(currentWeather, thresholds) {
+       if (currentWeather.temp > thresholds.temperature) {
+           console.log("Alert! Temperature has exceeded the threshold!");
+       }
+   }
+
+3. Send Notifications
+   - Implement a method to notify the user (e.g., email) when an alert is triggered.
+
+Step 5: Visualizing the Data
+1. Show Daily Summaries
+   - Use libraries like Chart.js to create charts that display trends such as:
+     a) Average daily temperature
+     b) Number of alerts triggered
+
+Step 6: Test the System
+1. Test the Setup
+   - Check if the system starts and connects to the OpenWeatherMap API.
+   
+2. Test Data Retrieval
+   - Simulate API calls and verify that the system retrieves weather data correctly.
+   
+3. Test Temperature Conversion
+   - Ensure the conversion from Kelvin to Celsius works correctly.
+
+4. Test Daily Summaries
+   - Simulate a series of weather updates and verify the calculations (average, max, min).
+
+5. Test Alerts
+   - Set thresholds and simulate weather conditions that exceed them. Check if alerts are triggered.
+
+Bonus:
+1. Add More Weather Data
+   - Extend the system to track additional weather details such as humidity and wind speed.
+   
+2. Add Forecasting Features
+   - Add a feature to retrieve and summarize weather forecasts.
+Declaration: I made a similar project one month ago called "API Proxy Server," which can be seen on 
+https://github.com/Skumar1690/-API-Proxy-Server. I will now modify it according to this task and push it to another repository at 
+https://github.com/Skumar1690/Weather-Watch-Real-Time-Monitoring-and-Summary.
