@@ -4,101 +4,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Monitoring</title>
+    <title>Weather Monitoring Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .loading {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
 
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
-    <div class="container max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
-        <h1 class="text-center text-4xl font-bold text-gray-800 mb-8">
-            🌤️ Weather Monitoring
-        </h1>
+        @keyframes pulse {
 
-        <form id="form" class="flex flex-col gap-6">
-            <div>
-                <input type="text" id="city" required placeholder="Enter City Name"
-                    class="border border-gray-300 rounded-md p-4 w-full text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
-            </div>
-            <button
-                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-md shadow-lg transition duration-300 ease-in-out"
-                type="submit">
-                Get Current Weather!
-            </button>
-        </form>
-
-        <div id="weatherResult" class="mt-8 p-6 bg-blue-50 rounded-lg shadow-inner hidden">
-            <!-- Weather result will be inserted here -->
-        </div>
-
-        <div id="errorResult" class="mt-4 p-4 bg-red-50 text-red-700 rounded-lg hidden">
-            <!-- Error message will be inserted here -->
-        </div>
-    </div>
-
-    <footer class="text-center text-gray-500 mt-12">
-        <p>
-            Made with ❤️ by <a href="https://github.com/Skumar1690/-API-Proxy-Server" target="_blank"
-                class="text-blue-500">Sourav
-            </a>
-        </p>
-    </footer>
-
-    <script>
-        const form = document.getElementById('form');
-        const city = document.getElementById('city');
-        const weatherResult = document.getElementById('weatherResult');
-        const errorResult = document.getElementById('errorResult');
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const cityName = city.value.trim();
-            if (!cityName) {
-                errorResult.innerHTML = 'Please enter a city name.';
-                errorResult.classList.remove('hidden');
-                weatherResult.classList.add('hidden');
-                return;
+            0%,
+            100% {
+                opacity: 1;
             }
 
-            try {
-                weatherResult.innerHTML = '';
-                errorResult.innerHTML = '';
-                weatherResult.classList.add('hidden');
-                errorResult.classList.add('hidden');
+            50% {
+                opacity: .5;
+            }
+        }
+    </style>
+</head>
 
-                // Fetching weather data from the server
-                const response = await fetch(`/getWeather?q=${cityName}`, {
+<body class="bg-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-blue-600">🌤️ Weather Monitor</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="refreshBtn"
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                        Refresh Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Search and Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- City Search -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold mb-4">Search City</h2>
+                <form id="weatherForm" class="space-y-4">
+                    <div>
+                        <input type="text" id="cityInput" required
+                            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter city name">
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors">
+                        Get Weather
+                    </button>
+                </form>
+            </div>
+
+            <!-- Alert Settings -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold mb-4">Alert Settings</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Temperature Threshold (°C)</label>
+                        <input type="number" id="tempThreshold" value="35"
+                            class="mt-1 w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Weather Condition Alert</label>
+                        <select id="conditionThreshold"
+                            class="mt-1 w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="Rain">Rain</option>
+                            <option value="Snow">Snow</option>
+                            <option value="Thunderstorm">Thunderstorm</option>
+                            <option value="Clear">Clear</option>
+                        </select>
+                    </div>
+                    <button id="updateAlertsBtn"
+                        class="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition-colors">
+                        Update Alert Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weather Display Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Current Weather Card -->
+            <div id="currentWeather" class="bg-white p-6 rounded-lg shadow-md hidden">
+                <h2 class="text-lg font-semibold mb-4">Current Weather</h2>
+                <div id="weatherContent" class="space-y-2">
+                    <!-- Weather content will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Weather Alerts Card -->
+            <div id="weatherAlerts" class="bg-white p-6 rounded-lg shadow-md hidden">
+                <h2 class="text-lg font-semibold mb-4">Weather Alerts</h2>
+                <div id="alertsContent" class="space-y-2">
+                    <!-- Alerts will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Daily Summary Card -->
+            <div id="dailySummary" class="bg-white p-6 rounded-lg shadow-md hidden">
+                <h2 class="text-lg font-semibold mb-4">Daily Summary</h2>
+                <div id="summaryContent" class="space-y-2">
+                    <!-- Summary content will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <!-- Temperature Chart -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold mb-4">Temperature Trend</h2>
+                <canvas id="temperatureChart"></canvas>
+            </div>
+
+            <!-- Weather Conditions Chart -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold mb-4">Weather Conditions Distribution</h2>
+                <canvas id="conditionsChart"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <!-- Error Toast -->
+    <div id="errorToast" class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg hidden">
+        <p id="errorMessage"></p>
+    </div>
+
+    <script>
+        // Global variables
+        let temperatureChart = null;
+        let conditionsChart = null;
+        let weatherData = {
+            readings: [],
+            alerts: [],
+            summary: null
+        };
+
+        // DOM Elements
+        const form = document.getElementById('weatherForm');
+        const cityInput = document.getElementById('cityInput');
+        const errorToast = document.getElementById('errorToast');
+        const errorMessage = document.getElementById('errorMessage');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const updateAlertsBtn = document.getElementById('updateAlertsBtn');
+
+        // Initialize charts
+        function initializeCharts() {
+            const tempCtx = document.getElementById('temperatureChart').getContext('2d');
+            const condCtx = document.getElementById('conditionsChart').getContext('2d');
+
+            temperatureChart = new Chart(tempCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: [],
+                        borderColor: 'rgb(59, 130, 246)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Temperature Trend'
+                        }
+                    }
+                }
+            });
+
+            conditionsChart = new Chart(condCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            'rgb(59, 130, 246)',
+                            'rgb(16, 185, 129)',
+                            'rgb(245, 158, 11)',
+                            'rgb(239, 68, 68)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Weather Conditions'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Fetch weather data
+        async function fetchWeather(city) {
+            try {
+                const response = await fetch(`/getWeather?q=${city}`, {
                     headers: {
-                        "x-api-key": "souravisawesome"
+                        'x-api-key': 'souravisawesome'
                     }
                 });
 
-                const data = await response.json();
-
                 if (!response.ok) {
-                    // If response status is not OK (200), show error message
-                    errorResult.innerHTML = `<p>${data.error || "An error occurred. Please try again later."}</p>`;
-                    errorResult.classList.remove('hidden');
-                    weatherResult.classList.add('hidden');
-                } else {
-                    // Display weather data
-                    const weatherInfo = data.data;
-                    weatherResult.innerHTML = `
-                        <h3 class="text-xl font-bold text-center mb-4">Weather in ${weatherInfo.name}</h3>
-                        <p class="text-lg text-gray-700"><strong>Temperature:</strong> ${(weatherInfo.main.temp - 273.15).toFixed(2)}°C</p>
-                        <p class="text-lg text-gray-700"><strong>Weather:</strong> ${weatherInfo.weather[0].description}</p>
-                        <p class="text-lg text-gray-700"><strong>Humidity:</strong> ${weatherInfo.main.humidity}%</p>
-                    `;
-                    weatherResult.classList.remove('hidden');
-                    errorResult.classList.add('hidden');
+                    throw new Error(await response.text());
                 }
+
+                const data = await response.json();
+                weatherData = {
+                    ...weatherData,
+                    ...data
+                };
+
+                updateUI();
             } catch (error) {
-                console.error('Error fetching weather data:', error);
-                errorResult.innerHTML = `<p>Error fetching weather data. Please try again later.</p>`;
-                errorResult.classList.remove('hidden');
-                weatherResult.classList.add('hidden');
+                showError(error.message);
+            }
+        }
+
+        // Update UI elements
+        function updateUI() {
+            updateCurrentWeather();
+            updateAlerts();
+            updateSummary();
+            updateCharts();
+        }
+
+        // Update current weather display
+        function updateCurrentWeather() {
+            const weather = weatherData.data;
+            if (!weather) return;
+
+            const temp = (weather.main.temp - 273.15).toFixed(1);
+            const currentWeather = document.getElementById('currentWeather');
+            const weatherContent = document.getElementById('weatherContent');
+
+            weatherContent.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-4xl font-bold">${temp}°C</p>
+                        <p class="text-lg">${weather.weather[0].main}</p>
+                        <p class="text-gray-600">${weather.weather[0].description}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <p><span class="font-medium">Humidity:</span> ${weather.main.humidity}%</p>
+                        <p><span class="font-medium">Wind:</span> ${weather.wind.speed} m/s</p>
+                        <p><span class="font-medium">Pressure:</span> ${weather.main.pressure} hPa</p>
+                    </div>
+                </div>
+            `;
+
+            currentWeather.classList.remove('hidden');
+        }
+
+        // Update alerts display
+        function updateAlerts() {
+            const alerts = weatherData.alerts || [];
+            const weatherAlerts = document.getElementById('weatherAlerts');
+            const alertsContent = document.getElementById('alertsContent');
+
+            if (alerts.length > 0) {
+                alertsContent.innerHTML = alerts
+                    .map(alert => `
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4">
+                            <p class="text-red-700">${alert}</p>
+                        </div>
+                    `)
+                    .join('');
+                weatherAlerts.classList.remove('hidden');
+            } else {
+                weatherAlerts.classList.add('hidden');
+            }
+        }
+
+        // Update summary display
+        function updateSummary() {
+            const summary = weatherData.summary;
+            if (!summary) return;
+
+            const dailySummary = document.getElementById('dailySummary');
+            const summaryContent = document.getElementById('summaryContent');
+
+            summaryContent.innerHTML = `
+                <div class="space-y-2">
+                    <p><span class="font-medium">Average Temp:</span> ${summary.averageTemp.toFixed(1)}°C</p>
+                    <p><span class="font-medium">Max Temp:</span> ${summary.maxTemp.toFixed(1)}°C</p>
+                    <p><span class="font-medium">Min Temp:</span> ${summary.minTemp.toFixed(1)}°C</p>
+                    <p><span class="font-medium">Dominant Condition:</span> ${summary.dominantCondition}</p>
+                    <p><span class="font-medium">Readings:</span> ${summary.readingCount}</p>
+                    <p><span class="font-medium">Last Updated:</span> ${new Date(summary.lastUpdated).toLocaleTimeString()}</p>
+                </div>
+            `;
+
+            dailySummary.classList.remove('hidden');
+        }
+
+        // Update charts
+        function updateCharts() {
+            if (!weatherData.summary) return;
+
+            // Update temperature chart
+            temperatureChart.data.labels = ['Minimum', 'Average', 'Maximum'];
+            temperatureChart.data.datasets[0].data = [
+                weatherData.summary.minTemp,
+                weatherData.summary.averageTemp,
+                weatherData.summary.maxTemp
+            ];
+            temperatureChart.update();
+
+            // Update conditions chart if we have readings
+            if (weatherData.readings && weatherData.readings.length > 0) {
+                const conditions = weatherData.readings.map(r => r.condition);
+                const conditionCounts = conditions.reduce((acc, curr) => {
+                    acc[curr] = (acc[curr] || 0) + 1;
+                    return acc;
+                }, {});
+
+                conditionsChart.data.labels = Object.keys(conditionCounts);
+                conditionsChart.data.datasets[0].data = Object.values(conditionCounts);
+                conditionsChart.update();
+            }
+        }
+
+        // Show error toast
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorToast.classList.remove('hidden');
+            setTimeout(() => {
+                errorToast.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Event Listeners
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const city = cityInput.value.trim();
+            if (city) {
+                await fetchWeather(city);
             }
         });
+
+        refreshBtn.addEventListener('click', async () => {
+            const city = cityInput.value.trim();
+            if (city) {
+                await fetchWeather(city);
+            }
+        });
+
+        updateAlertsBtn.addEventListener('click', () => {
+            const tempThreshold = document.getElementById('tempThreshold').value;
+            const conditionThreshold = document.getElementById('conditionThreshold').value;
+            // Update alert settings
+            console.log('Alert settings updated:', { tempThreshold, conditionThreshold });
+        });
+
+        // Initialize charts on load
+        document.addEventListener('DOMContentLoaded', initializeCharts);
     </script>
 </body>
 
