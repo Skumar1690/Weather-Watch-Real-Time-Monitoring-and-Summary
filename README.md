@@ -99,7 +99,6 @@ Implement visual analytics using Chart.js to track:
 ```javascript
 // Fetch current weather
 const weatherData = await getWeather("Mumbai");
-console.log(`Current temperature: ${kelvinToCelsius(weatherData.main.temp)}°C`);
 ```
 
 ## 🤝 Contributing
