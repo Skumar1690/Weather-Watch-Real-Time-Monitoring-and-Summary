@@ -1,36 +1,39 @@
-# Weather Monitoring
+# Weather-Watch: Real-Time Monitoring and Summary System 🌤️
 
-This project is an API proxy server that fetches weather data from the OpenWeatherMap API. It is built using **Node.js** with **Express.js** and implements features like **rate limiting**, **caching**, and **CORS** to enhance performance and security. The server is intended to fetch weather information for any city provided in the query.
+A sophisticated Node.js-based weather monitoring system that leverages the OpenWeatherMap API to provide real-time weather insights and daily summaries.
 
-## Features
+## 🌟 Features
 
-- **CORS enabled**: Allows cross-origin resource sharing.
-- **Rate limiting**: Prevents abuse by limiting the number of requests an IP can make within a set time frame (5 requests per 5 minutes).
-- **Caching**: Caches weather data for 5 minutes to reduce external API requests.
-- **Error Handling**: Handles and returns proper error responses for invalid requests, rate limit exceedance, and internal server errors.
-- **Proxy Security**: Uses a secret API key to secure proxy requests.
+- **Live Weather Data**: Real-time weather information for Indian cities (customizable for other regions)
+- **Smart Temperature Handling**: Automatic conversion from Kelvin to Celsius
+- **Intelligent Summaries**: Daily weather analytics including:
+  - Average temperature
+  - Maximum and minimum temperatures
+  - Dominant weather conditions
+- **Advanced Alerting System** (Bonus): Configurable thresholds for weather conditions
+- **Visual Analytics** (Bonus): Weather trend visualization using Chart.js
 
-## Prerequisites
+## 📋 Prerequisites
 
-- **Node.js** (version 14.x or higher)
-- **npm** (Node Package Manager)
-- OpenWeatherMap API key. You can get an API key by signing up at [OpenWeatherMap](https://home.openweathermap.org/users/sign_up).
+- Node.js (v14.x or higher)
+- npm (Node Package Manager)
+- OpenWeatherMap API key ([Get yours here](https://home.openweathermap.org/users/sign_up))
 
-## Project Setup
+## 🚀 Getting Started
 
-### Clone the repository
-
-To clone this project to your local machine, run the following command:
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Skumar1690/-API-Proxy-Server.git
+git clone https://github.com/Skumar1690/Weather-Watch-Real-Time-Monitoring-and-Summary.git
+cd Weather-Watch-Real-Time-Monitoring-and-Summary
 ```
 
-## Environment Variables
+### 2. Configure Environment
 
-You need to configure your environment variables to run this project. Create a `.env` file in the root of the project and add the following details:
+Create a `.env` file in the project root:
 
-```bash
+```env
+# API Configuration
 
 API_BASE_URL="http://api.openweathermap.org/data/2.5/weather"
 API_BASE_KEY="appid"
@@ -38,6 +41,84 @@ API_KEY_VALUE="0845f0b322938a32731e842aa0aac735"
 CACHE_TIME="5 minutes"  # Caching time for the weather data
 RATELIMIT_TIME=5        # Rate limiting time in minutes for request limit per user
 SECRET_API_KEY="souravisawesome" # Custom secret API key for securing proxy requests
-
-
 ```
+
+### 3. Install Dependencies
+
+```bash
+npm install
+```
+
+## 💻 Core Functionality
+
+### Weather Data Retrieval
+
+```javascript
+const axios = require("axios");
+
+async function getWeather(city) {
+  const url = `${process.env.API_BASE_URL}?q=${city}&appid=${process.env.API_KEY_VALUE}`;
+  const response = await axios.get(url);
+  return response.data;
+}
+```
+
+### Temperature Conversion
+
+```javascript
+function kelvinToCelsius(kelvin) {
+  return kelvin - 273.15;
+}
+```
+
+### Daily Summaries
+
+The system automatically collects weather data at configured intervals and generates comprehensive daily summaries including:
+
+- Temperature metrics (avg/max/min)
+- Predominant weather conditions
+
+### Alert System (Bonus Feature)
+
+Configure custom alerts based on:
+
+- Temperature thresholds
+- Specific weather conditions
+- Custom notification methods
+
+### Data Visualization (Bonus Feature)
+
+Implement visual analytics using Chart.js to track:
+
+- Temperature trends
+- Weather pattern changes
+- Historical data analysis
+
+## 📊 Example Usage
+
+```javascript
+// Fetch current weather
+const weatherData = await getWeather("Mumbai");
+console.log(`Current temperature: ${kelvinToCelsius(weatherData.main.temp)}°C`);
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- OpenWeatherMap API for weather data
+- index.js for visualization capabilities
+
+## 📧 Contact
+
+- Project Link: [https://github.com/Skumar1690/Weather-Watch-Real-Time-Monitoring-and-Summary](https://github.com/Skumar1690/Weather-Watch-Real-Time-Monitoring-and-Summary)
