@@ -1,4 +1,4 @@
-# Weather-Watch: Real-Time Monitoring and Summary System 🌤️
+# Weather-Watch: Real-Time Monitoring and Summary System 🌤
 A sophisticated Node.js-based weather monitoring system that leverages the OpenWeatherMap API to provide real-time weather insights and daily summaries.
 
 [Live Demo](https://weather-watch-real-time-monitoring-and.onrender.com)
