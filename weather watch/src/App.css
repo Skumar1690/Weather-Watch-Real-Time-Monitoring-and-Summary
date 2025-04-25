@@ -1,0 +1,90 @@
+/* Full-screen gradient background */
+.app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  font-family: 'Segoe UI', sans-serif;
+  color: #222;
+}
+
+/* Main container with frosted glass effect */
+.container {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  color: #222;
+}
+
+/* Title styling */
+h1 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  color: #333;
+}
+
+/* Form layout */
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.search-form input {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  outline: none;
+}
+
+.search-form button {
+  padding: 0.6rem;
+  background-color: #0077ff;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.search-form button:hover {
+  background-color: #005ee6;
+}
+
+/* Weather box */
+.weather-box {
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 1rem;
+  margin-top: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.weather-box h2 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.weather-box p {
+  margin: 0.3rem 0;
+  font-size: 1.05rem;
+  color: #444;
+}
+
+/* Error message */
+.error {
+  color: #d8000c;
+  background-color: #ffd2d2;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+}
